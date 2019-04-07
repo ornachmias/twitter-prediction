@@ -13,6 +13,8 @@ class Tweet(object):
         self.text = None
         self.user_mentions = None
         self.party = None
+        self.full_text = None
+        self.language = None
 
     def load_from_status(self, status_object: Status, party):
         self.party = party
@@ -20,7 +22,13 @@ class Tweet(object):
         self.create_date = status_object.created_at
         self.retweet_count = status_object.retweet_count
         self.favorite_count = status_object.favorite_count
-        self.text = status_object.text
+
+        if hasattr(status_object, 'full_text'):
+            self.text = status_object.full_text
+        elif hasattr(status_object, 'text'):
+            self.text = status_object.text
+
+        self.language = status_object.lang
 
         self.hashtags = []
         self.urls = []

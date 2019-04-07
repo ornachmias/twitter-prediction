@@ -15,8 +15,7 @@ class DataLoader(object):
         for p in categorized_twitter_accounts:
             current_tweets = []
             if not self._fileSystemDataAccess.is_tweets_exists(p, self._fileSystemDataAccess.categorized_tweets_path):
-                current_tweets = self._twitterDataAccess.get_user_tweets(p, Configurations.historical_days_extraction,
-                                                                         categorized_twitter_accounts[p])
+                current_tweets = self._twitterDataAccess.get_user_tweets(p, Configurations.historical_days_extraction, categorized_twitter_accounts[p])
                 self._fileSystemDataAccess.save_tweets(p, current_tweets, self._fileSystemDataAccess.categorized_tweets_path)
             else:
                 current_tweets = self._fileSystemDataAccess.get_tweets(p, self._fileSystemDataAccess.categorized_tweets_path)
@@ -35,11 +34,9 @@ class DataLoader(object):
             if not self._fileSystemDataAccess.is_tweets_exists(q, self._fileSystemDataAccess.queries_tweets_path):
                 current_tweets = self._twitterDataAccess.get_search_tweets(country_id,
                                                                            Configurations.historical_days_extraction, q)
-                self._fileSystemDataAccess.save_tweets(q, current_tweets,
-                                                       self._fileSystemDataAccess.queries_tweets_path)
+                self._fileSystemDataAccess.save_tweets(q, current_tweets, self._fileSystemDataAccess.queries_tweets_path)
             else:
-                current_tweets = self._fileSystemDataAccess.get_tweets(q,
-                                                                       self._fileSystemDataAccess.queries_tweets_path)
+                current_tweets = self._fileSystemDataAccess.get_tweets(q, self._fileSystemDataAccess.queries_tweets_path)
 
             tweets.extend(current_tweets)
 

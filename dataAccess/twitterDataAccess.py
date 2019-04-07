@@ -26,7 +26,7 @@ class TwitterDataAccess(object):
     def get_user_tweets(self, target, days, party):
         tweets = []
         end_date = datetime.utcnow() - timedelta(days=days)
-        for status in Cursor(self._api.user_timeline, id=target, count=1000).items():
+        for status in Cursor(self._api.user_timeline, id=target, count=1000, tweet_mode='extended').items():
             tweet = Tweet()
             tweet.load_from_status(status, party)
             tweets.append(tweet)
@@ -46,7 +46,7 @@ class TwitterDataAccess(object):
         query = target
         if country_code is not None:
             query = 'place:{} AND {}'.format(country_code, target)
-        for status in Cursor(self._api.search, q=query, count=1000).items():
+        for status in Cursor(self._api.search, q=query, count=1000, tweet_mode='extended').items():
             if status.created_at > end_date:
                 tweet = Tweet()
                 tweet.load_from_status(status, Parties.Unknown)
