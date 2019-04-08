@@ -2,7 +2,7 @@ from tqdm import tqdm
 
 from compressionHandler import CompressionHandler
 from dataLoader import DataLoader
-from model.parties import Parties, categorized_twitter_accounts
+from popularityHandler import PopularityHandler
 from preProcess import PreProcess
 
 data_loader = DataLoader()
@@ -30,10 +30,23 @@ print('Test Set: English={}, Hebrew={}'.format(len(english_test_set), len(hebrew
 # At this point I think I'll skip the English tweets, not enough data to train on
 
 splitted_training_set = pre_process.split_by_party(hebrew_training_set)
+# batched_training_set = []
+# for p in splitted_training_set:
+#     batches = pre_process.split_to_batches(splitted_training_set[p], 100)
+#     for b in batches:
+#         batched_training_set.append((p, b))
+#
+# training_merged = []
+# for p, b in batched_training_set:
+#     training_merged.append((p, pre_process.merge_tweets_text(b)))
+
 for p in splitted_training_set:
     merged_text = pre_process.merge_tweets_text(splitted_training_set[p])
     print('Party {} has {} tweets with total length of {}'.format(p, len(splitted_training_set[p]), len(merged_text)))
     splitted_training_set[p] = merged_text
+
+popularityHandler = PopularityHandler()
+popularityResult = popularityHandler.get_popularity_score(hebrew_training_set)
 
 compression_handler = CompressionHandler()
 compression_handler.initialize(splitted_training_set)

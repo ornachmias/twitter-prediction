@@ -1,4 +1,5 @@
 import random
+import re
 
 
 class PreProcess(object):
@@ -6,13 +7,16 @@ class PreProcess(object):
         tweets = self._remove_duplicates(tweets)
         tweets = self._decapitalize_tweets(tweets)
         tweets = self._remove_numbers_and_punctuations(tweets)
+        tweets = self._remove_urls(tweets)
         tweets = self._shuffle_data(tweets)
         return tweets
 
-    def split_to_batches(self, iterable, n=1):
-        l = len(iterable)
-        for ndx in range(0, l, n):
-            yield iterable[ndx:min(ndx + n, l)]
+    def split_to_batches(self, tweets, batch_size):
+        result = []
+        l = len(tweets)
+        for i in range(0, l, batch_size):
+            result.append(tweets[i:i+batch_size])
+        return result
 
     def merge_tweets_text(self, tweets):
         result = ''
@@ -40,6 +44,12 @@ class PreProcess(object):
             result[t.language].append(t)
 
         return result
+
+    def _remove_urls(self, tweets):
+        for t in tweets:
+            t.text = re.sub(r'https?:?\/\/.*[\r\n]*', '', t.text, flags=re.MULTILINE)
+
+        return tweets
 
     def _remove_duplicates(self, tweets):
         result = []
