@@ -64,21 +64,24 @@ class PredictionModel(object):
 
         return results
 
-    def _aggregate_results(self, tweets_classification, popularity_result):
+    def _aggregate_results(self, tweets_classification, popularity_result, hashtags_results):
         results = {}
         popularity_weight = Configurations.popularity_algo_weight
+        hashtags_weight = Configurations.hashtags_algo_weight
         total_votes = sum(tweets_classification.values())
         total_prob = 0
         for r in tweets_classification:
             prob1 = tweets_classification[r] / total_votes
             prob2 = popularity_result[r]
-            joint_prob = ((1 - popularity_weight) * prob1) + (popularity_weight * prob2)
+            prob3 = hashtags_results[r]
+            joint_prob = ((1 - popularity_weight - hashtags_weight) * prob1) + (popularity_weight * prob2) + (hashtags_weight * prob3)
             total_prob += joint_prob
 
         for r in tweets_classification:
             prob1 = tweets_classification[r] / total_votes
             prob2 = popularity_result[r]
-            joint_prob = ((1 - popularity_weight) * prob1) + (popularity_weight * prob2)
+            prob3 = hashtags_results[r]
+            joint_prob = ((1 - popularity_weight - hashtags_weight) * prob1) + (popularity_weight * prob2) + (hashtags_weight * prob3)
             total = joint_prob / total_prob
             results[r] = total
 
@@ -90,9 +93,10 @@ class PredictionModel(object):
 
         popularity_handler = PopularityHandler()
         popularity_result = popularity_handler.get_popularity_score(train_data)
+        hashtags_dist = popularity_handler.count_hashtags(train_data)
 
         tweets_classification = self._classify_tweets(processed_train_data, processed_test_data)
-        results = self._aggregate_results(tweets_classification, popularity_result)
+        results = self._aggregate_results(tweets_classification, popularity_result, hashtags_dist)
         return results
 
 
