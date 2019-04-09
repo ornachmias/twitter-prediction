@@ -1,65 +1,63 @@
-from tqdm import tqdm
+from model.parties import Parties
+from predictionModel import PredictionModel
+from multiprocessing.pool import ThreadPool
 
-from compressionHandler import CompressionHandler
-from dataLoader import DataLoader
-from popularityHandler import PopularityHandler
-from preProcess import PreProcess
 
-data_loader = DataLoader()
-pre_process = PreProcess()
+prediction_model = PredictionModel()
 
-categorized_tweets = data_loader.get_categorized_tweets()
-uncategorized_tweets = data_loader.get_uncategorized_tweets()
+number_of_iterations = 1
+async_results = []
+pool = ThreadPool(processes=number_of_iterations)
+for i in range(number_of_iterations):
+    async_results.append(pool.apply_async(prediction_model.run))
 
-categorized_tweets = pre_process.pre_process(categorized_tweets)
-categorized_tweets = pre_process.split_by_language(categorized_tweets)
+total_results = {}
+for i in async_results:
+    result = i.get()
+    for p in result:
+        if p not in total_results:
+            total_results[p] = 0
+        total_results[p] += result[p]
 
-hebrew_training_set = categorized_tweets['iw']
-english_training_set = categorized_tweets['en']
-print('Training Set: English={}, Hebrew={}'.format(len(english_training_set), len(hebrew_training_set)))
+for p in total_results:
+    print('Party {} got {:.4f}% votes'.format(p.name, (total_results[p] * 100)/number_of_iterations))
 
-uncategorized_tweets = pre_process.pre_process(uncategorized_tweets)
-uncategorized_tweets = pre_process.split_by_language(uncategorized_tweets)
 
-hebrew_test_set = uncategorized_tweets['iw']
-english_test_set = uncategorized_tweets['en']
-print('Test Set: English={}, Hebrew={}'.format(len(english_test_set), len(hebrew_test_set)))
-
-# Training Set: English=155, Hebrew=5848
-# Test Set: English=22663, Hebrew=3386
-# At this point I think I'll skip the English tweets, not enough data to train on
-
-splitted_training_set = pre_process.split_by_party(hebrew_training_set)
-# batched_training_set = []
-# for p in splitted_training_set:
-#     batches = pre_process.split_to_batches(splitted_training_set[p], 100)
-#     for b in batches:
-#         batched_training_set.append((p, b))
+# for i in range(8):
+#     results = prediction_model.run()
+#     for p in results:
+#         if p not in total_results:
+#             total_results[p] = 0
+#         total_results[p] += results[p]
 #
-# training_merged = []
-# for p, b in batched_training_set:
-#     training_merged.append((p, pre_process.merge_tweets_text(b)))
+# for p in total_results:
+#     print('Party {} got {:.4f}% votes'.format(p.name, (total_results[p] * 100)/8))
 
-for p in splitted_training_set:
-    merged_text = pre_process.merge_tweets_text(splitted_training_set[p])
-    print('Party {} has {} tweets with total length of {}'.format(p, len(splitted_training_set[p]), len(merged_text)))
-    splitted_training_set[p] = merged_text
-
-popularityHandler = PopularityHandler()
-popularityResult = popularityHandler.get_popularity_score(hebrew_training_set)
-
-compression_handler = CompressionHandler()
-compression_handler.initialize(splitted_training_set)
-
-
-results = {}
-for t in tqdm(hebrew_test_set):
-    selected_party = compression_handler.find_best_match(t.text)
-    if selected_party not in results:
-        results[selected_party] = 0
-    results[selected_party] += 1
-
-total_votes = sum(results.values())
-
-for r in results:
-    print('Party={} got {}%'.format(r, (results[r]/total_votes)*100))
+# voting_results = {
+#     Parties.BlueAndWhite: 1260,
+#     Parties.Kulanu: 237,
+#     Parties.Meretz: 482,
+#     Parties.Labor: 754,
+#     Parties.UnionOfRightWing: 225,
+#     Parties.NewRight: 246,
+#     Parties.Likud: 169,
+#     Parties.Zehut: 5,
+#     Parties.Shas: 1,
+#     Parties.HadashTaal: 7
+# }
+#
+# popularity_results = {
+#     Parties.HadashTaal: 0.02389762405590604,
+#     Parties.Meretz: 0.00788987759894752,
+#     Parties.UnionOfRightWing: 0.011184043959826539,
+#     Parties.Zehut: 0.015602355420385442,
+#     Parties.Kulanu: 0.009481101727676671,
+#     Parties.UnitedTorah: 0.0002075071769475874,
+#     Parties.Likud: 0.37030756784786906,
+#     Parties.NewRight: 0.02913513778842919,
+#     Parties.Shas: 0.01648328749057575,
+#     Parties.Labor: 0.48356591701462665,
+#     Parties.BlueAndWhite: 0.03224557991880961
+# }
+#
+# results = prediction_model._aggregate_results(voting_results, popularity_results)

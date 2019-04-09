@@ -8,3 +8,6 @@ class Configurations(object):
     search_keywords = ['בחירות ישראל', '#בחירות2019', 'בחירות 2019',
                        'israel elections', '#IsraelElections2019', '#israelelections', '#israel_elections']
     search_country = ''  # I've decided to give up on the country search, the number of results are too small
+    batch_size = 100
+    popularity_algo_weight = 0.6
+    n_value = 10

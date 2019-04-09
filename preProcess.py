@@ -7,6 +7,7 @@ class PreProcess(object):
         tweets = self._remove_duplicates(tweets)
         tweets = self._decapitalize_tweets(tweets)
         tweets = self._remove_numbers_and_punctuations(tweets)
+        tweets = self._remove_useless_words(tweets)
         tweets = self._remove_urls(tweets)
         tweets = self._shuffle_data(tweets)
         return tweets
@@ -73,6 +74,14 @@ class PreProcess(object):
         ignore_letters = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', ':', ',', '.', '(', ')', '"']
         for t in tweets:
             for i in ignore_letters:
+                t.text = t.text.replace(i, '')
+
+        return tweets
+
+    def _remove_useless_words(self, tweets):
+        ignore_words = ['בנימין', 'נתניהו', 'ביבי']
+        for t in tweets:
+            for i in ignore_words:
                 t.text = t.text.replace(i, '')
 
         return tweets
