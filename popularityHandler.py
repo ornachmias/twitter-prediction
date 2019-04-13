@@ -3,6 +3,12 @@ from model.parties import categorized_twitter_accounts
 
 class PopularityHandler(object):
     def get_popularity_score(self, tweets):
+        """
+        Count the number of retweets on each party's tweet, and set a score to each party.
+        This score will be used as the popularity score.
+        :param tweets: Array of labeled tweets
+        :return: Dictionary of party to probability score
+        """
         party_retweets_count = {}
         party_tweets_count = {}
         parties = set()
@@ -31,6 +37,12 @@ class PopularityHandler(object):
         return relative_popularity
 
     def count_hashtags(self, tweets):
+        """
+        Count the number of user's tweets hashtags to a specific politician,
+        and set a score for this count for each party.
+        :param tweets: Labeled or unlabeled tweets
+        :return: Dictionary of party to hashtags count score
+        """
         results = {}
         for t in tweets:
             if t.user_mentions is not None and len(t.user_mentions) > 0:

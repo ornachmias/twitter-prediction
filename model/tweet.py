@@ -4,6 +4,9 @@ from tweepy import Status
 class Tweet(object):
 
     def __init__(self):
+        """
+        Initialize an internal representation of the Status object from Tweepy
+        """
         self.id = None
         self.create_date = None
         self.hashtags = None
@@ -17,12 +20,19 @@ class Tweet(object):
         self.language = None
 
     def load_from_status(self, status_object: Status, party):
+        """
+        Convert Tweepy's Status object to internal Tweet object
+        :param status_object: Status object received from iterating over Tweepy query
+        :param party: The current status label
+        """
         self.party = party
         self.id = status_object.id_str
         self.create_date = status_object.created_at
         self.retweet_count = status_object.retweet_count
         self.favorite_count = status_object.favorite_count
 
+        # full_text and text are different properties and only one could be initialized
+        # We prefer the full text and the queries always request it, but just in case we won't get it
         if hasattr(status_object, 'full_text'):
             self.text = status_object.full_text
         elif hasattr(status_object, 'text'):
